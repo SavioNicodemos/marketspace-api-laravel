@@ -14,5 +14,6 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return ['message' => 'Hi, welcome to the EventsApp API :)'];
+    $result = ['message' => 'Hi, welcome to the EventsApp API :)'];
+    return $result;
 });
