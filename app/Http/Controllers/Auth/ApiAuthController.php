@@ -4,30 +4,37 @@ namespace App\Http\Controllers\Auth;
 
 use App\Models\User;
 use Illuminate\Support\Facades\{Hash, Validator, Password};
-use Illuminate\Support\Str;
 use App\Http\Controllers\Controller;
+use App\Services\UserService;
 use Illuminate\Http\Request;
 
 class ApiAuthController extends Controller
 {
+    protected $userService;
+
+    public function __construct(UserService $userService)
+    {
+        $this->userService = $userService;
+    }
+
+    public function me() {
+        return auth()->user();
+    }
+
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-            'type' => 'integer',
+            'tel' => 'required|string|max:255|unique:users',
+            'password' => 'required|string|min:8',
+            'avatar' => 'required|image'
         ]);
         if ($validator->fails()) {
             return response(['errors' => $validator->errors()->all()], 422);
         }
-        $request['password'] = Hash::make($request['password']);
-        $request['remember_token'] = Str::random(10);
-        $request['type'] = $request['type'] ? $request['type']  : 0;
-        $user = User::create($request->toArray());
-        $token = $user->createToken('Laravel Password Grant Client')->accessToken;
-        $response = ['token' => $token];
-        return response($response, 200);
+        $this->userService->create($request);
+        return response(null, 201);
     }
 
     public function login(Request $request)

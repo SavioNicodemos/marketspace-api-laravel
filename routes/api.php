@@ -16,11 +16,12 @@ use App\Http\Controllers\Auth\ApiAuthController;
 
 Route::group(['prefix' => 'v1'], function () {
     // Not authenticated routes
-    Route::post('/login', [ApiAuthController::class, 'login'])->name('login.api');
-    Route::post('/register', [ApiAuthController::class, 'register'])->name('register.api');
+    Route::post('/sessions', [ApiAuthController::class, 'login'])->name('login.api');
+    Route::post('/users', [ApiAuthController::class, 'register'])->name('register.api');
 
     Route::middleware('auth:api')->group(function () {
-        // our routes to be protected will go in here
         Route::post('/logout', [ApiAuthController::class, 'logout'])->name('logout.api');
+
+        Route::get("users/me", [ApiAuthController::class, 'me'])->name('users.me');
     });
 });
