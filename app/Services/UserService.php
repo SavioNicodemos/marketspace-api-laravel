@@ -37,4 +37,21 @@ class UserService
             return [null,  422, 'error', ['Something went wrong. Please try again later!']];
         }
     }
+
+    public function getUserData($userId)
+    {
+        try {
+            $user = User::with('image')->find($userId);
+
+            return [
+                'id' => $user->id,
+                'avatar' => $user->image->name,
+                'name' => $user->name,
+                'email' => $user->email,
+                'tel' => $user->tel
+            ];
+        } catch (\Exception $e) {
+            return [null,  422, 'error', ['Something went wrong. Please try again later!']];
+        }
+    }
 }
