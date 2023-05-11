@@ -18,7 +18,10 @@ class ApiAuthController extends Controller
     }
 
     public function me() {
-        return auth()->user();
+        $userId = auth()->user()->id;
+
+        $userData = $this->userService->getUserData($userId);
+        return $userData;
     }
 
     public function register(Request $request)
