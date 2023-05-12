@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\ApiAuthController;
+use App\Http\Controllers\ProductController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,5 +24,7 @@ Route::group(['prefix' => 'v1'], function () {
         Route::post('/logout', [ApiAuthController::class, 'logout'])->name('logout.api');
 
         Route::get("users/me", [ApiAuthController::class, 'me'])->name('users.me');
+
+        Route::apiResource('products', ProductController::class);
     });
 });
