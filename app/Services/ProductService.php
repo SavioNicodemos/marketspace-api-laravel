@@ -103,6 +103,9 @@ class ProductService
         if (!$product) {
             throw new NotFoundException('Product');
         }
+        if ($product->user_id !== auth()->user()->id) {
+            throw new NotAuthorizedException('Product');
+        }
         DB::beginTransaction();
         try {
             $product->name = $filters['name'] ?? $product->name;
@@ -110,6 +113,7 @@ class ProductService
             $product->price = $filters['price'] ?? $product->price;
             $product->is_new = $filters['is_new'] ?? $product->is_new;
             $product->accept_trade = $filters['accept_trade'] ?? $product->accept_trade;
+            $product->is_active = $filters['is_active'] ?? $product->is_active;
 
             $product->save();
 

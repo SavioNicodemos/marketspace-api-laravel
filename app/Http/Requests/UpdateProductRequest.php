@@ -27,6 +27,7 @@ class UpdateProductRequest extends FormRequest
             'is_new' => ['boolean'],
             'price' => ['integer'],
             'accept_trade' => ['boolean'],
+            'is_active' => ['boolean'],
             'payment_methods' => ['array'],
             'payment_methods.*' => ['exists:payment_methods,key'],
         ];
