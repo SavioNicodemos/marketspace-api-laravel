@@ -43,11 +43,7 @@ class ProductController extends Controller
      */
     public function show(string $id): JsonResponse
     {
-        try {
-            return $this->successResponse($this->productService->findOneById($id));
-        } catch (Throwable $e) {
-            return $this->errorResponse($e->getMessage());
-        }
+        return $this->successResponse($this->productService->findOneById($id));
     }
 
     /**
@@ -61,8 +57,8 @@ class ProductController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Product $product)
+    public function destroy(string $productId): JsonResponse
     {
-        //
+        return $this->successResponse($this->productService->delete($productId), 204);
     }
 }

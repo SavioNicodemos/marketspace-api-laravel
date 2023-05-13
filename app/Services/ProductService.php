@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Exceptions\NotAuthorizedException;
 use App\Exceptions\NotFoundException;
 use Illuminate\Support\Facades\DB;
 use App\Models\Product;
@@ -69,5 +70,25 @@ class ProductService
         unset($product['user']['id']);
 
         return $product;
+    }
+
+    /**
+     * @throws NotFoundException
+     * @throws NotAuthorizedException
+     */
+    public function delete(string $productId)
+    {
+        $product = Product::find($productId);
+
+        if (!$product) {
+            throw new NotFoundException('Product');
+        }
+        if ($product->user_id !== auth()->user()->id) {
+            throw new NotAuthorizedException('Product');
+        }
+
+        $product->delete();
+
+        return true;
     }
 }
