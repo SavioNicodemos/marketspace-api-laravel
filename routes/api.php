@@ -20,6 +20,7 @@ Route::group(['prefix' => 'v1'], function () {
     Route::post('/sessions', [ApiAuthController::class, 'login'])->name('login.api');
     Route::post('/users', [ApiAuthController::class, 'register'])->name('register.api');
 
+    Route::get('images/{imageName}', \App\Http\Controllers\ViewImageController::class);
     Route::middleware('auth:api')->group(function () {
         Route::post('/logout', [ApiAuthController::class, 'logout'])->name('logout.api');
 
