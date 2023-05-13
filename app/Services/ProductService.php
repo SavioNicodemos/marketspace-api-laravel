@@ -59,7 +59,7 @@ class ProductService
         ])->find($productId);
 
         if (!$product) {
-            throw new NotFoundException('Product not found');
+            throw new NotFoundException('Product');
         }
 
         $product = $product->toArray();

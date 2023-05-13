@@ -7,6 +7,12 @@ use Illuminate\Http\JsonResponse;
 
 class NotFoundException extends Exception
 {
+    protected string $modelName;
+
+    public function __construct($modelName)
+    {
+        $this->modelName = $modelName ? $modelName : 'Data';
+    }
     /**
      * Render the exception into an HTTP response.
      *
@@ -14,6 +20,6 @@ class NotFoundException extends Exception
      */
     public function render(): JsonResponse
     {
-        return response()->json(['message' => 'Registry not found.'], 404);
+        return response()->json(['message' => ucfirst($this->modelName).' not found.'], 404);
     }
 }

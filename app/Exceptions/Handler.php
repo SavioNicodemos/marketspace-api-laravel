@@ -3,8 +3,7 @@
 namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
-use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\{MethodNotAllowedHttpException, NotFoundHttpException, AccessDeniedHttpException};
 
 class Handler extends ExceptionHandler
 {
@@ -33,6 +32,12 @@ class Handler extends ExceptionHandler
         $this->renderable(function (MethodNotAllowedHttpException $e, $request) {
             return response()->json([
                 'message' => 'Method not allowed for this route.'
+            ], $e->getStatusCode());
+        });
+
+        $this->renderable(function (AccessDeniedHttpException $e, $request) {
+            return response()->json([
+                'message' => 'This action is unauthorized.'
             ], $e->getStatusCode());
         });
     }
