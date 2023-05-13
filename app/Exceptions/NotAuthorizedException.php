@@ -20,6 +20,6 @@ class NotAuthorizedException extends Exception
      */
     public function render(): JsonResponse
     {
-        return response()->json(['message' => "You're not authorized to delete this ".strtolower($this->modelName.'.')], 403);
+        return response()->json(['message' => "You're not authorized to modify this ".strtolower($this->modelName.'.')], 403);
     }
 }
