@@ -2,8 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreProductRequest;
-use App\Http\Requests\UpdateProductRequest;
+use App\Http\Requests\{ListNotMyProductsRequest, StoreProductRequest, UpdateProductRequest};
 use App\Models\Product;
 use App\Services\ProductService;
 use App\Traits\ApiResponser;
@@ -24,9 +23,9 @@ class ProductController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(ListNotMyProductsRequest $request)
     {
-        //
+        return $this->successResponse($this->productService->listNotMyProducts($request->validated()));
     }
 
     /**

@@ -43,6 +43,12 @@ class Product extends Model
 
     protected $fillable = ['name', 'description', 'is_new', 'price', 'accept_trade', 'user_id', 'is_active'];
 
+    protected $casts = [
+        'is_new' => 'boolean',
+        'accept_trade' => 'boolean',
+        'is_active' => 'boolean',
+    ];
+
     /**
      *
      * The payment methods that belong to the product
