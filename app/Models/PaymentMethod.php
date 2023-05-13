@@ -30,6 +30,8 @@ class PaymentMethod extends Model
 {
     use UuidTrait;
 
+    protected $hidden = ['pivot'];
+
     /**
      * The products that belong to the payment method.
      */

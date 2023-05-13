@@ -6,15 +6,21 @@ use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use App\Models\Product;
 use App\Services\ProductService;
+use App\Traits\ApiResponser;
+use Illuminate\Http\JsonResponse;
+use Throwable;
 
 class ProductController extends Controller
 {
-    protected $productService;
+    use ApiResponser;
+
+    protected ProductService $productService;
 
     public function __construct(ProductService $productService)
     {
         $this->productService = $productService;
     }
+
     /**
      * Display a listing of the resource.
      */
@@ -25,18 +31,23 @@ class ProductController extends Controller
 
     /**
      * Store a newly created resource in storage.
+     * @throws Throwable
      */
-    public function store(StoreProductRequest $request)
+    public function store(StoreProductRequest $request): JsonResponse
     {
-        return $this->productService->create($request);
+        return response()->json($this->productService->create($request), 201);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Product $product)
+    public function show(string $id): JsonResponse
     {
-        //
+        try {
+            return $this->successResponse($this->productService->findOneById($id));
+        } catch (Throwable $e) {
+            return $this->errorResponse($e->getMessage());
+        }
     }
 
     /**

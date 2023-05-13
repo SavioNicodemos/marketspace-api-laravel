@@ -2,13 +2,19 @@
 
 namespace App\Services;
 
+use App\Exceptions\NotFoundException;
 use Illuminate\Support\Facades\DB;
 use App\Models\Product;
+use Throwable;
+use Exception;
 
 class ProductService
 {
 
-    public function create($request)
+    /**
+     * @throws Throwable
+     */
+    public function create($request): Product|null
     {
         DB::beginTransaction();
         try {
@@ -18,7 +24,9 @@ class ProductService
             $product->is_new = $request['is_new'];
             $product->price = $request['price'];
             $product->accept_trade = $request['accept_trade'];
-            $product->user_id = auth()->user()->id;
+            if (!empty(auth()->user()->id)) {
+                $product->user_id = auth()->user()->id;
+            }
             $product->is_active = true;
 
             $product->save();
@@ -30,8 +38,36 @@ class ProductService
             DB::commit();
 
             return $product;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollback();
+            throw $e;
         }
+    }
+
+    /**
+     * @throws NotFoundException
+     */
+    public function findOneById(string $productId): array
+    {
+        $product = Product::with([
+            'user:id,name,tel',
+            'paymentMethods:key,name',
+            'user.image:imageable_id,name',
+            'productImages' => function ($query) {
+                return $query->select(['id', 'name as path', 'imageable_id']);
+            }
+        ])->find($productId);
+
+        if (!$product) {
+            throw new NotFoundException('Product not found');
+        }
+
+        $product = $product->toArray();
+
+        $product['user']['avatar'] = $product['user']['image']['name'];
+        unset($product['user']['image']);
+        unset($product['user']['id']);
+
+        return $product;
     }
 }

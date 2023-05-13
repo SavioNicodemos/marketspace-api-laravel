@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\{BelongsToMany, BelongsTo, MorphMany, MorphOne};
 use App\Traits\UuidTrait;
 
 /**
@@ -35,8 +35,6 @@ use App\Traits\UuidTrait;
  * @method static \Illuminate\Database\Eloquent\Builder|Product wherePrice($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Product whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Product whereUserId($value)
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\PaymentMethod> $paymentMethods
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\PaymentMethod> $paymentMethods
  * @mixin \Eloquent
  */
 class Product extends Model
@@ -46,10 +44,27 @@ class Product extends Model
     protected $fillable = ['name', 'description', 'is_new', 'price', 'accept_trade', 'user_id', 'is_active'];
 
     /**
+     *
+     * The payment methods that belong to the product
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /**
      * The payment methods that belong to the product
      */
     public function paymentMethods(): BelongsToMany
     {
         return $this->belongsToMany(PaymentMethod::class);
+    }
+
+    /**
+     * Get all the product's image.
+     */
+    public function productImages(): MorphMany
+    {
+        return $this->morphMany(Image::class, 'imageable');
     }
 }
