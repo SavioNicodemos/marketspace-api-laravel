@@ -22,7 +22,13 @@ class UpdateProductRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'name' => ['string'],
+            'description' => ['string'],
+            'is_new' => ['boolean'],
+            'price' => ['integer'],
+            'accept_trade' => ['boolean'],
+            'payment_methods' => ['array'],
+            'payment_methods.*' => ['exists:payment_methods,key'],
         ];
     }
 }
