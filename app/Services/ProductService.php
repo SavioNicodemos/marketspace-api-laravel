@@ -164,4 +164,21 @@ class ProductService
             ])
             ->get(['id', 'name', 'price', 'is_new', 'accept_trade', 'user_id']);
     }
+
+    public function getMyProducts(array $filters)
+    {
+        return Product::where('user_id', auth()->user()->id)
+            ->where(function (Builder $query) use ($filters) {
+                if (isset($filters['is_active'])) {
+                    $query->where('is_active', $filters['is_active']);
+                }
+            })
+            ->with([
+                'paymentMethods:key,name',
+                'productImages' => function ($query) {
+                    return $query->select(['id', 'name as path', 'imageable_id']);
+                }
+            ])
+            ->get();
+    }
 }

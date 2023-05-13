@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Exceptions\NotAuthorizedException;
 use App\Exceptions\NotFoundException;
-use App\Http\Requests\{ListNotMyProductsRequest, StoreProductRequest, UpdateProductRequest};
+use App\Http\Requests\{ListMyProductsRequest, ListNotMyProductsRequest, StoreProductRequest, UpdateProductRequest};
 use App\Services\ProductService;
 use App\Traits\ApiResponser;
 use Illuminate\Http\JsonResponse;
@@ -71,5 +71,10 @@ class ProductController extends Controller
     public function destroy(string $productId): JsonResponse
     {
         return $this->successResponse($this->productService->delete($productId), 204);
+    }
+
+    public function getMyProducts(ListMyProductsRequest $request): JsonResponse
+    {
+        return $this->successResponse($this->productService->getMyProducts($request->validated()));
     }
 }
