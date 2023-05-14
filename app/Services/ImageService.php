@@ -5,7 +5,7 @@ namespace App\Services;
 class ImageService
 {
 
-    public function storeImage($imageFromRequest, string $folder)
+    public function storeImage($imageFromRequest, string $folder): array
     {
         $originalName = $imageFromRequest->getClientOriginalName();
         $extension = $imageFromRequest->getClientOriginalExtension();
@@ -19,7 +19,8 @@ class ImageService
         return [
             'name' => $newName,
             'original_name' => $originalName,
-            'format' => $extension
+            'format' => $extension,
+            'folder' => $folder
         ];
     }
 }

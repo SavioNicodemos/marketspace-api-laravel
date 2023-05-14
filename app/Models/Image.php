@@ -38,7 +38,8 @@ class Image extends Model
     protected $fillable = [
         'name',
         'original_name',
-        'format'
+        'format',
+        'folder'
     ];
     /**
      * Get the parent imageable model.
