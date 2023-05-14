@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Image;
 use Illuminate\Database\Eloquent\Builder;
 use App\Exceptions\NotAuthorizedException;
 use App\Exceptions\NotFoundException;
@@ -180,5 +181,41 @@ class ProductService
                 }
             ])
             ->get();
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public function saveProductImages(array $filters)
+    {
+        $productId = $filters['product_id'];
+        $images = $filters['images'];
+
+        DB::beginTransaction();
+        try {
+            $product = Product::find($productId);
+            if (!$product) {
+                throw new NotFoundException('Product');
+            }
+            if ($product->user_id !== auth()->user()->id) {
+                throw new NotAuthorizedException('Product');
+            }
+
+            $imageService = new ImageService();
+
+            $imagesObjects = [];
+            foreach ($images as $image) {
+                $imageObject = $imageService->storeImage($image, 'products');
+                $imagesObjects[] = new Image($imageObject);
+            }
+
+            $product->productImages()->saveMany($imagesObjects);
+
+            DB::commit();
+            return Image::where('imageable_id', $productId)->get();
+        } catch (Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
     }
 }

@@ -28,5 +28,6 @@ Route::group(['prefix' => 'v1'], function () {
 
         Route::get('users/products', [ProductController::class, 'getMyProducts']);
         Route::apiResource('products', ProductController::class);
+        Route::post('products/images', [ProductController::class, 'addImages']);
     });
 });

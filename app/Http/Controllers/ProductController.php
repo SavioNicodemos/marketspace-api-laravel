@@ -4,7 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Exceptions\NotAuthorizedException;
 use App\Exceptions\NotFoundException;
-use App\Http\Requests\{ListMyProductsRequest, ListNotMyProductsRequest, StoreProductRequest, UpdateProductRequest};
+use App\Http\Requests\{AddImageProductRequest,
+    ListMyProductsRequest,
+    ListNotMyProductsRequest,
+    StoreProductRequest,
+    UpdateProductRequest};
 use App\Services\ProductService;
 use App\Traits\ApiResponser;
 use Illuminate\Http\JsonResponse;
@@ -76,5 +80,12 @@ class ProductController extends Controller
     public function getMyProducts(ListMyProductsRequest $request): JsonResponse
     {
         return $this->successResponse($this->productService->getMyProducts($request->validated()));
+    }
+
+    public function addImages(AddImageProductRequest $request): JsonResponse
+    {
+        return $this->successResponse(
+            $this->productService->saveProductImages($request->validated())
+        );
     }
 }
