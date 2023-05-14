@@ -5,10 +5,13 @@ namespace App\Http\Controllers;
 use App\Exceptions\NotAuthorizedException;
 use App\Exceptions\NotFoundException;
 use App\Http\Requests\{AddImageProductRequest,
+    DeleteImageProductRequest,
     ListMyProductsRequest,
     ListNotMyProductsRequest,
     StoreProductRequest,
-    UpdateProductRequest};
+    UpdateProductRequest
+};
+use App\Services\ImageService;
 use App\Services\ProductService;
 use App\Traits\ApiResponser;
 use Illuminate\Http\JsonResponse;
@@ -82,10 +85,23 @@ class ProductController extends Controller
         return $this->successResponse($this->productService->getMyProducts($request->validated()));
     }
 
+    /**
+     * @throws Throwable
+     */
     public function addImages(AddImageProductRequest $request): JsonResponse
     {
         return $this->successResponse(
             $this->productService->saveProductImages($request->validated())
         );
+    }
+
+    /**
+     * @throws NotAuthorizedException
+     */
+    public function deleteImages(DeleteImageProductRequest $request): JsonResponse
+    {
+        $imageService = new ImageService();
+        $imageService->removeProductImages($request->get('productImagesIds'));
+        return $this->successResponse(null, 204);
     }
 }

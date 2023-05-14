@@ -27,7 +27,9 @@ Route::group(['prefix' => 'v1'], function () {
         Route::get("users/me", [ApiAuthController::class, 'me'])->name('users.me');
 
         Route::get('users/products', [ProductController::class, 'getMyProducts']);
-        Route::apiResource('products', ProductController::class);
         Route::post('products/images', [ProductController::class, 'addImages']);
+        Route::delete('products/images', [ProductController::class, 'deleteImages']);
+
+        Route::apiResource('products', ProductController::class);
     });
 });
