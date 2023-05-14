@@ -2,14 +2,19 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Exceptions\NotFoundException;
 use App\Models\User;
+use App\Traits\ApiResponser;
 use Illuminate\Support\Facades\{Hash, Validator, Password};
 use App\Http\Controllers\Controller;
 use App\Services\UserService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class ApiAuthController extends Controller
 {
+    use ApiResponser;
+
     protected $userService;
 
     public function __construct(UserService $userService)
@@ -17,7 +22,8 @@ class ApiAuthController extends Controller
         $this->userService = $userService;
     }
 
-    public function me() {
+    public function me()
+    {
         $userId = auth()->user()->id;
 
         $userData = $this->userService->getUserData($userId);
@@ -40,27 +46,26 @@ class ApiAuthController extends Controller
         return response(null, 201);
     }
 
-    public function login(Request $request)
+    /**
+     * @throws NotFoundException
+     */
+    public function login(Request $request): JsonResponse
     {
-        $request->validate([
+        $validated = $request->validate([
             'email' => 'required|string|email|max:255',
             'password' => 'required|string|min:8',
         ]);
 
-        $user = User::where('email', $request->email)->first();
-        if ($user) {
-            if (Hash::check($request->password, $user->password)) {
-                $token = $user->createToken('Laravel Password Grant Client')->accessToken;
-                $response = ['token' => $token];
-                return response($response, 200);
-            } else {
-                $response = ["message" => "Password mismatch"];
-                return response($response, 422);
-            }
-        } else {
-            $response = ["message" => 'User does not exist'];
-            return response($response, 422);
+        $user = User::where('email', $validated['email'])->first();
+        if (!$user) {
+            throw new NotFoundException('User');
         }
+        if (!Hash::check($validated['password'], $user->password)) {
+            return $this->errorResponse('Password mismatch', 422);
+        }
+
+        $token = $user->createToken('web')->plainTextToken;
+        return $this->successResponse(['token' => $token]);
     }
 
     public function logout(Request $request)
