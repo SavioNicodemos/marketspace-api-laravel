@@ -76,38 +76,35 @@ class ApiAuthController extends Controller
         return $this->successResponse($response, 200);
     }
 
-    public function forgotPassword(Request $request)
+    public function forgotPassword(Request $request): JsonResponse
     {
-        $input = $request->only('email');
-        $validator = Validator::make($input, [
-            'email' => "required|email"
+        $validated = $request->validate([
+            'email' => 'required|email'
         ]);
-        if ($validator->fails()) {
-            return response()->json($validator->errors());
-        }
-        $response = Password::sendResetLink($input);
+
+        $response = Password::sendResetLink($validated);
 
         $message = $response == Password::RESET_LINK_SENT ? 'Mail send successfully' : 'GLOBAL_SOMETHING_WANTS_TO_WRONG';
 
-        return response()->json($message);
+        return $this->successResponse($message);
     }
 
-    public function passwordReset(Request $request)
+    public function passwordReset(Request $request): JsonResponse
     {
-        $input = $request->only('email', 'token', 'password', 'password_confirmation');
-        $validator = Validator::make($input, [
+        $validated = $request->validate([
             'token' => 'required',
             'email' => 'required|email',
             'password' => 'required|confirmed|min:8',
         ]);
-        if ($validator->fails()) {
-            return response()->json($validator->errors());
-        }
-        $response = Password::reset($input, function ($user, $password) {
+
+        $response = Password::reset($validated, function ($user, $password) {
             $user->password = Hash::make($password);
             $user->save();
+            $user->tokens()->delete();
         });
+
+
         $message = $response == Password::PASSWORD_RESET ? 'Password reset successfully' : 'GLOBAL_SOMETHING_WANTS_TO_WRONG';
-        return response()->json($message);
+        return $this->successResponse($message);
     }
 }

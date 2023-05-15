@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\ApiAuthController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ViewImageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,8 +20,10 @@ Route::group(['prefix' => 'v1'], function () {
     // Not authenticated routes
     Route::post('/sessions', [ApiAuthController::class, 'login'])->name('login.api');
     Route::post('/users', [ApiAuthController::class, 'register'])->name('register.api');
+    Route::post('/password/forgot', [ApiAuthController::class, 'forgotPassword'])->name('forgot.api');
+    Route::put('/password/reset', [ApiAuthController::class, 'passwordReset'])->name('forgot.api');
 
-    Route::get('images/{imageName}', \App\Http\Controllers\ViewImageController::class);
+    Route::get('images/{imageName}', ViewImageController::class);
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/sessions', [ApiAuthController::class, 'logout'])->name('logout.api');
