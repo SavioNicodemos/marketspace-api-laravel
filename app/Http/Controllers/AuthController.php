@@ -1,49 +1,45 @@
 <?php
 
-namespace App\Http\Controllers\Auth;
+namespace App\Http\Controllers;
 
 use App\Exceptions\NotFoundException;
 use App\Models\User;
-use App\Traits\ApiResponser;
-use Illuminate\Support\Facades\{Hash, Validator, Password};
-use App\Http\Controllers\Controller;
 use App\Services\UserService;
+use App\Traits\ApiResponser;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\{Hash, Password};
 
-class ApiAuthController extends Controller
+class AuthController extends Controller
 {
     use ApiResponser;
 
-    protected $userService;
+    protected UserService $userService;
 
     public function __construct(UserService $userService)
     {
         $this->userService = $userService;
     }
 
-    public function me()
+    public function me(): JsonResponse
     {
         $userId = auth()->user()->id;
 
-        $userData = $this->userService->getUserData($userId);
-        return $userData;
+        return $this->successResponse($this->userService->getUserData($userId));
     }
 
-    public function register(Request $request)
+    public function register(Request $request): JsonResponse
     {
-        $validator = Validator::make($request->all(), [
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'tel' => 'required|string|max:255|unique:users',
             'password' => 'required|string|min:8',
             'avatar' => 'required|image'
         ]);
-        if ($validator->fails()) {
-            return response(['errors' => $validator->errors()->all()], 422);
-        }
-        $this->userService->create($request);
-        return response(null, 201);
+
+        $this->userService->create($validated);
+        return $this->successResponse(null, 201);
     }
 
     /**
@@ -68,46 +64,42 @@ class ApiAuthController extends Controller
         return $this->successResponse(['token' => $token]);
     }
 
-    public function logout(Request $request)
+    public function logout(Request $request): JsonResponse
     {
-        $token = $request->user()->token();
-        $token->revoke();
+        $token = $request->user()->currentAccessToken();
+        $token->delete();
         $response = ['message' => 'You have been successfully logged out!'];
-        return response($response, 200);
+        return $this->successResponse($response);
     }
 
-    public function forgotPassword(Request $request)
+    public function forgotPassword(Request $request): JsonResponse
     {
-        $input = $request->only('email');
-        $validator = Validator::make($input, [
-            'email' => "required|email"
+        $validated = $request->validate([
+            'email' => 'required|email'
         ]);
-        if ($validator->fails()) {
-            return response()->json($validator->errors());
-        }
-        $response = Password::sendResetLink($input);
+
+        $response = Password::sendResetLink($validated);
 
         $message = $response == Password::RESET_LINK_SENT ? 'Mail send successfully' : 'GLOBAL_SOMETHING_WANTS_TO_WRONG';
 
-        return response()->json($message);
+        return $this->successResponse($message);
     }
 
-    public function passwordReset(Request $request)
+    public function passwordReset(Request $request): JsonResponse
     {
-        $input = $request->only('email', 'token', 'password', 'password_confirmation');
-        $validator = Validator::make($input, [
+        $validated = $request->validate([
             'token' => 'required',
             'email' => 'required|email',
             'password' => 'required|confirmed|min:8',
         ]);
-        if ($validator->fails()) {
-            return response()->json($validator->errors());
-        }
-        $response = Password::reset($input, function ($user, $password) {
+
+        $response = Password::reset($validated, function ($user, $password) {
             $user->password = Hash::make($password);
             $user->save();
+            $user->tokens()->delete();
         });
+
         $message = $response == Password::PASSWORD_RESET ? 'Password reset successfully' : 'GLOBAL_SOMETHING_WANTS_TO_WRONG';
-        return response()->json($message);
+        return $this->successResponse($message);
     }
 }
