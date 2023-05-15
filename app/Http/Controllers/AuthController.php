@@ -1,49 +1,45 @@
 <?php
 
-namespace App\Http\Controllers\Auth;
+namespace App\Http\Controllers;
 
 use App\Exceptions\NotFoundException;
 use App\Models\User;
-use App\Traits\ApiResponser;
-use Illuminate\Support\Facades\{Hash, Validator, Password};
-use App\Http\Controllers\Controller;
 use App\Services\UserService;
+use App\Traits\ApiResponser;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\{Hash, Password};
 
-class ApiAuthController extends Controller
+class AuthController extends Controller
 {
     use ApiResponser;
 
-    protected $userService;
+    protected UserService $userService;
 
     public function __construct(UserService $userService)
     {
         $this->userService = $userService;
     }
 
-    public function me()
+    public function me(): JsonResponse
     {
         $userId = auth()->user()->id;
 
-        $userData = $this->userService->getUserData($userId);
-        return $userData;
+        return $this->successResponse($this->userService->getUserData($userId));
     }
 
-    public function register(Request $request)
+    public function register(Request $request): JsonResponse
     {
-        $validator = Validator::make($request->all(), [
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'tel' => 'required|string|max:255|unique:users',
             'password' => 'required|string|min:8',
             'avatar' => 'required|image'
         ]);
-        if ($validator->fails()) {
-            return response(['errors' => $validator->errors()->all()], 422);
-        }
-        $this->userService->create($request);
-        return response(null, 201);
+
+        $this->userService->create($validated);
+        return $this->successResponse(null, 201);
     }
 
     /**
@@ -73,7 +69,7 @@ class ApiAuthController extends Controller
         $token = $request->user()->currentAccessToken();
         $token->delete();
         $response = ['message' => 'You have been successfully logged out!'];
-        return $this->successResponse($response, 200);
+        return $this->successResponse($response);
     }
 
     public function forgotPassword(Request $request): JsonResponse
@@ -102,7 +98,6 @@ class ApiAuthController extends Controller
             $user->save();
             $user->tokens()->delete();
         });
-
 
         $message = $response == Password::PASSWORD_RESET ? 'Password reset successfully' : 'GLOBAL_SOMETHING_WANTS_TO_WRONG';
         return $this->successResponse($message);
