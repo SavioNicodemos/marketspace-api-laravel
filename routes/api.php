@@ -23,6 +23,7 @@ Route::group(['prefix' => 'v1'], function () {
     Route::get('images/{imageName}', \App\Http\Controllers\ViewImageController::class);
 
     Route::middleware('auth:sanctum')->group(function () {
+        Route::delete('/sessions', [ApiAuthController::class, 'logout'])->name('logout.api');
         Route::post('/logout', [ApiAuthController::class, 'logout'])->name('logout.api');
 
         Route::get("users/me", [ApiAuthController::class, 'me'])->name('users.me');
