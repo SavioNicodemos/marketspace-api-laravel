@@ -112,4 +112,19 @@ return [
 
     'password_timeout' => 10800,
 
+    /*
+    |--------------------------------------------------------------------------
+    | Refresh Token Timeout
+    |--------------------------------------------------------------------------
+    |
+    | This value is setting the time-to-live (TTL) for a refresh token.
+    | The value is retrieved from the `REFRESH_TOKEN_TTL` environment variable,
+    | and if it is not set, the default value of 4320 (minutes) is used.
+    | This setting determines how long a refresh token is valid for before it
+    | expires and the user needs to obtain a new one.
+    |
+    */
+
+    'refresh_token_ttl' => env('REFRESH_TOKEN_TTL', 4320),
+
 ];
