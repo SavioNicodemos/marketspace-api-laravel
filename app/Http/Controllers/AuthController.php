@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\NotFoundException;
-use App\Models\User;
+use App\Services\AuthService;
 use App\Services\UserService;
 use App\Traits\ApiResponser;
 use Illuminate\Http\JsonResponse;
@@ -15,10 +15,12 @@ class AuthController extends Controller
     use ApiResponser;
 
     protected UserService $userService;
+    protected AuthService $authService;
 
-    public function __construct(UserService $userService)
+    public function __construct(UserService $userService, AuthService $authService)
     {
         $this->userService = $userService;
+        $this->authService = $authService;
     }
 
     public function me(): JsonResponse
@@ -52,16 +54,7 @@ class AuthController extends Controller
             'password' => 'required|string|min:8',
         ]);
 
-        $user = User::where('email', $validated['email'])->first();
-        if (!$user) {
-            throw new NotFoundException('User');
-        }
-        if (!Hash::check($validated['password'], $user->password)) {
-            return $this->errorResponse('Password mismatch', 422);
-        }
-
-        $token = $user->createToken('web')->plainTextToken;
-        return $this->successResponse(['token' => $token]);
+        return $this->successResponse($this->authService->loginWithPasswordAndEmail($validated));
     }
 
     public function logout(Request $request): JsonResponse
