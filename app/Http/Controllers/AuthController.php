@@ -32,7 +32,7 @@ class AuthController extends Controller
 
     public function register(Request $request): JsonResponse
     {
-        $validated = $request->validate([
+        $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'tel' => 'required|string|max:255|unique:users',
@@ -40,7 +40,7 @@ class AuthController extends Controller
             'avatar' => 'required|image'
         ]);
 
-        $this->userService->create($validated);
+        $this->userService->create($request);
         return $this->successResponse(null, 201);
     }
 
