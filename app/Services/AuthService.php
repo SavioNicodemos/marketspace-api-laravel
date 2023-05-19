@@ -2,15 +2,15 @@
 
 namespace App\Services;
 
+use App\Exceptions\ApplicationException;
 use App\Exceptions\NotFoundException;
+use App\Models\RefreshToken;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 use App\Models\User;
 use JetBrains\PhpStorm\ArrayShape;
-use Ramsey\Uuid\UuidInterface;
 
 class AuthService
 {
@@ -19,7 +19,7 @@ class AuthService
      * @throws NotFoundException
      * @throws Exception
      */
-    #[ArrayShape(['token' => "\Laravel\Sanctum\string|string", 'user' => "mixed", 'refresh_token' => "\Ramsey\Uuid\UuidInterface"])]
+    #[ArrayShape(['token' => "\Laravel\Sanctum\string|string", 'user' => "mixed", 'refresh_token' => "string"])]
     public function loginWithPasswordAndEmail(array $validated): array
     {
         $user = User::where('email', $validated['email'])->first();
@@ -30,6 +30,13 @@ class AuthService
             throw new Exception('Password Mismatch');
         }
 
+        return $this->loginByUserId($user->id);
+    }
+
+    #[ArrayShape(['token' => "\Laravel\Sanctum\string|string", 'user' => "mixed", 'refresh_token' => "string"])]
+    private function loginByUserId(string $userId): array
+    {
+        $user = User::find($userId);
         $token = $user->createToken('web')->plainTextToken;
         $refreshToken = $this->createRefreshToken($user->id);
         return [
@@ -39,19 +46,36 @@ class AuthService
         ];
     }
 
-    public function createRefreshToken(string $userId): UuidInterface
+    public function createRefreshToken(string $userId): string
     {
         $carbon = new Carbon();
         $now = $carbon->now();
-        $refreshTokenId = Str::uuid();
-        DB::table('refresh_tokens')->insert([
-            'id' => $refreshTokenId,
+        $refreshToken = RefreshToken::create([
             'expires_in' => $now->addMinutes(config('auth.refresh_token_ttl'))->unix(),
             'user_id' => $userId,
-            'created_at' => $now,
-            'updated_at' => $now
         ]);
+        return $refreshToken->id;
+    }
 
-        return $refreshTokenId;
+    /**
+     * @throws Exception
+     */
+    function refreshToken(array $validatedRequest): array
+    {
+        $refreshTokenInstance = DB::table('refresh_tokens')->where('id', $validatedRequest['refresh_token']);
+
+        $refreshTokenObject = $refreshTokenInstance->first();
+
+        if (!$refreshTokenObject) {
+            throw new ApplicationException('Invalid refresh token');
+        }
+        if (Carbon::parse($refreshTokenObject->expires_in)->isBefore(Carbon::now())) {
+            $refreshTokenInstance->delete();
+            throw new ApplicationException('Expired refresh token');
+        }
+
+        $refreshTokenInstance->delete();
+
+        return $this->loginByUserId($refreshTokenObject->user_id);
     }
 }

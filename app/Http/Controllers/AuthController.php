@@ -57,6 +57,15 @@ class AuthController extends Controller
         return $this->successResponse($this->authService->loginWithPasswordAndEmail($validated));
     }
 
+    public function refreshToken(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'refresh_token' => 'required|uuid',
+        ]);
+
+        return $this->successResponse($this->authService->refreshToken($validated));
+    }
+
     public function logout(Request $request): JsonResponse
     {
         $token = $request->user()->currentAccessToken();
