@@ -19,6 +19,7 @@ use App\Http\Controllers\ViewImageController;
 Route::group(['prefix' => 'v1'], function () {
     // Not authenticated routes
     Route::post('/sessions', [AuthController::class, 'login'])->name('login.api');
+    Route::post('/sessions/refresh-token', [AuthController::class, 'refreshToken'])->middleware(['throttle:5,1'])->name('login.api');
     Route::post('/users', [AuthController::class, 'register'])->name('register.api');
     Route::post('/password/forgot', [AuthController::class, 'forgotPassword'])->name('forgot.api');
     Route::put('/password/reset', [AuthController::class, 'passwordReset'])->name('forgot.api');
