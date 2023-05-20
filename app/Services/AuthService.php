@@ -16,8 +16,7 @@ class AuthService
 {
 
     /**
-     * @throws NotFoundException
-     * @throws Exception
+     * @throws NotFoundException|ApplicationException
      */
     #[ArrayShape(['token' => "\Laravel\Sanctum\string|string", 'user' => "mixed", 'refresh_token' => "string"])]
     public function loginWithPasswordAndEmail(array $validated): array
@@ -27,7 +26,7 @@ class AuthService
             throw new NotFoundException('User');
         }
         if (!Hash::check($validated['password'], $user->password)) {
-            throw new Exception('Password Mismatch');
+            throw new ApplicationException('Password Mismatch', 403);
         }
 
         return $this->loginByUserId($user->id);
@@ -58,7 +57,7 @@ class AuthService
     }
 
     /**
-     * @throws Exception
+     * @throws ApplicationException
      */
     function refreshToken(array $validatedRequest): array
     {

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\ApplicationException;
 use App\Exceptions\NotFoundException;
 use App\Services\AuthService;
 use App\Services\UserService;
@@ -45,7 +46,7 @@ class AuthController extends Controller
     }
 
     /**
-     * @throws NotFoundException
+     * @throws NotFoundException|ApplicationException
      */
     public function login(Request $request): JsonResponse
     {
@@ -57,6 +58,9 @@ class AuthController extends Controller
         return $this->successResponse($this->authService->loginWithPasswordAndEmail($validated));
     }
 
+    /**
+     * @throws ApplicationException
+     */
     public function refreshToken(Request $request): JsonResponse
     {
         $validated = $request->validate([
