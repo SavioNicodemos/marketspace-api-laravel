@@ -2,18 +2,17 @@
 
 namespace App\Services;
 
-use App\Models\Image;
-use Illuminate\Database\Eloquent\Builder;
 use App\Exceptions\NotAuthorizedException;
 use App\Exceptions\NotFoundException;
-use Illuminate\Support\Facades\DB;
+use App\Models\Image;
 use App\Models\Product;
-use Throwable;
 use Exception;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
+use Throwable;
 
 class ProductService
 {
-
     /**
      * @throws Throwable
      */
@@ -27,7 +26,7 @@ class ProductService
             $product->is_new = $request['is_new'];
             $product->price = $request['price'];
             $product->accept_trade = $request['accept_trade'];
-            if (!empty(auth()->user()->id)) {
+            if (! empty(auth()->user()->id)) {
                 $product->user_id = auth()->user()->id;
             }
             $product->is_active = true;
@@ -58,10 +57,10 @@ class ProductService
             'user.image:imageable_id,name',
             'productImages' => function ($query) {
                 return $query->select(['id', 'name as path', 'imageable_id']);
-            }
+            },
         ])->find($productId);
 
-        if (!$product) {
+        if (! $product) {
             throw new NotFoundException('Product');
         }
 
@@ -82,7 +81,7 @@ class ProductService
     {
         $product = Product::find($productId);
 
-        if (!$product) {
+        if (! $product) {
             throw new NotFoundException('Product');
         }
         if ($product->user_id !== auth()->user()->id) {
@@ -101,7 +100,7 @@ class ProductService
     public function update(array $filters, string $productId): bool
     {
         $product = Product::find($productId);
-        if (!$product) {
+        if (! $product) {
             throw new NotFoundException('Product');
         }
         if ($product->user_id !== auth()->user()->id) {
@@ -118,7 +117,7 @@ class ProductService
 
             $product->save();
 
-            if (isset($filters['payment_methods']) && !!count($filters['payment_methods'])) {
+            if (isset($filters['payment_methods']) && (bool) count($filters['payment_methods'])) {
                 $paymentMethodService = new PaymentMethodService();
                 $paymentMethodsIds = $paymentMethodService->getIdsByKeys($filters['payment_methods']);
 
@@ -146,11 +145,11 @@ class ProductService
                     $query->where('accept_trade', $filters['accept_trade']);
                 }
                 if (isset($filters['query'])) {
-                    $query->where('name', 'LIKE', '%' . $filters['query'] . '%');
+                    $query->where('name', 'LIKE', '%'.$filters['query'].'%');
                 }
             })
             ->whereHas('paymentMethods', function (Builder $paymentsQuery) use ($filters) {
-                $hasPaymentMethodsFilter = isset($filters['payment_methods']) && !!count($filters['payment_methods']);
+                $hasPaymentMethodsFilter = isset($filters['payment_methods']) && (bool) count($filters['payment_methods']);
                 if ($hasPaymentMethodsFilter) {
                     $paymentsQuery->whereIn('key', $filters['payment_methods']);
                 }
@@ -161,7 +160,7 @@ class ProductService
                 'user.image:imageable_id,name',
                 'productImages' => function ($query) {
                     return $query->select(['id', 'name as path', 'imageable_id']);
-                }
+                },
             ])
             ->get(['id', 'name', 'price', 'is_new', 'accept_trade', 'user_id']);
     }
@@ -178,7 +177,7 @@ class ProductService
                 'paymentMethods:key,name',
                 'productImages' => function ($query) {
                     return $query->select(['id', 'name as path', 'imageable_id']);
-                }
+                },
             ])
             ->get();
     }
@@ -194,7 +193,7 @@ class ProductService
         DB::beginTransaction();
         try {
             $product = Product::find($productId);
-            if (!$product) {
+            if (! $product) {
                 throw new NotFoundException('Product');
             }
             if ($product->user_id !== auth()->user()->id) {
@@ -212,6 +211,7 @@ class ProductService
             $product->productImages()->saveMany($imagesObjects);
 
             DB::commit();
+
             return Image::where('imageable_id', $productId)->get();
         } catch (Exception $e) {
             DB::rollBack();

@@ -8,6 +8,7 @@ use Illuminate\Http\JsonResponse;
 class ApplicationException extends Exception
 {
     protected $message;
+
     protected $code;
 
     public function __construct($message, $code = 400)
@@ -15,10 +16,9 @@ class ApplicationException extends Exception
         $this->message = $message;
         $this->code = $code;
     }
+
     /**
      * Render the exception into an HTTP response.
-     *
-     * @return JsonResponse
      */
     public function render(): JsonResponse
     {

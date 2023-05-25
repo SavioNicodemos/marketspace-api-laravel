@@ -26,7 +26,7 @@ class ListNotMyProductsRequest extends FormRequest
             'accept_trade' => ['boolean'],
             'payment_methods' => ['array'],
             'payment_methods.*' => ['exists:payment_methods,key'],
-            'query' => ['string']
+            'query' => ['string'],
         ];
     }
 }

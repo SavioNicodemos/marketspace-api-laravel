@@ -9,13 +9,15 @@ use App\Services\UserService;
 use App\Traits\ApiResponser;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\{Hash, Password};
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 
 class AuthController extends Controller
 {
     use ApiResponser;
 
     protected UserService $userService;
+
     protected AuthService $authService;
 
     public function __construct(UserService $userService, AuthService $authService)
@@ -38,10 +40,11 @@ class AuthController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'tel' => 'required|string|max:255|unique:users',
             'password' => 'required|string|min:8',
-            'avatar' => 'required|image'
+            'avatar' => 'required|image',
         ]);
 
         $this->userService->create($request);
+
         return $this->successResponse(null, 201);
     }
 
@@ -75,13 +78,14 @@ class AuthController extends Controller
         $token = $request->user()->currentAccessToken();
         $token->delete();
         $response = ['message' => 'You have been successfully logged out!'];
+
         return $this->successResponse($response);
     }
 
     public function forgotPassword(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'email' => 'required|email'
+            'email' => 'required|email',
         ]);
 
         $response = Password::sendResetLink($validated);
@@ -106,6 +110,7 @@ class AuthController extends Controller
         });
 
         $message = $response == Password::PASSWORD_RESET ? 'Password reset successfully' : 'GLOBAL_SOMETHING_WANTS_TO_WRONG';
+
         return $this->successResponse($message);
     }
 }

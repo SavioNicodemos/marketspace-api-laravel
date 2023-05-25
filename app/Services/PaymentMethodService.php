@@ -6,7 +6,6 @@ use App\Models\PaymentMethod;
 
 class PaymentMethodService
 {
-
     public function getIdsByKeys(array $keys): array
     {
         $paymentMethodIds = PaymentMethod::whereIn('payment_methods.key', $keys)

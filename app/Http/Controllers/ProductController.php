@@ -4,13 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Exceptions\NotAuthorizedException;
 use App\Exceptions\NotFoundException;
-use App\Http\Requests\{AddImageProductRequest,
-    DeleteImageProductRequest,
-    ListMyProductsRequest,
-    ListNotMyProductsRequest,
-    StoreProductRequest,
-    UpdateProductRequest
-};
+use App\Http\Requests\AddImageProductRequest;
+use App\Http\Requests\DeleteImageProductRequest;
+use App\Http\Requests\ListMyProductsRequest;
+use App\Http\Requests\ListNotMyProductsRequest;
+use App\Http\Requests\StoreProductRequest;
+use App\Http\Requests\UpdateProductRequest;
 use App\Services\ImageService;
 use App\Services\ProductService;
 use App\Traits\ApiResponser;
@@ -38,6 +37,7 @@ class ProductController extends Controller
 
     /**
      * Store a newly created resource in storage.
+     *
      * @throws Throwable
      */
     public function store(StoreProductRequest $request): JsonResponse
@@ -47,6 +47,7 @@ class ProductController extends Controller
 
     /**
      * Display the specified resource.
+     *
      * @throws NotFoundException
      */
     public function show(string $id): JsonResponse
@@ -56,6 +57,7 @@ class ProductController extends Controller
 
     /**
      * Update the specified resource in storage.
+     *
      * @throws NotFoundException
      * @throws Throwable
      */
@@ -72,6 +74,7 @@ class ProductController extends Controller
 
     /**
      * Remove the specified resource from storage.
+     *
      * @throws NotFoundException
      * @throws NotAuthorizedException
      */
@@ -102,6 +105,7 @@ class ProductController extends Controller
     {
         $imageService = new ImageService();
         $imageService->removeProductImages($request->get('productImagesIds'));
+
         return $this->successResponse(null, 204);
     }
 }

@@ -10,21 +10,26 @@ use Response;
 class ViewImageController extends Controller
 {
     use ApiResponser;
+
     /**
      * Handle the incoming request.
      */
     public function __invoke(string $imageName)
     {
         $image = Image::where('name', $imageName)->first();
-        if (!$image) abort(404);
+        if (! $image) {
+            abort(404);
+        }
 
-        $path = public_path() . "/storage/{$image->folder}/" . $imageName;
+        $path = public_path()."/storage/{$image->folder}/".$imageName;
 
-        if (!File::exists($path)) abort(404);
+        if (! File::exists($path)) {
+            abort(404);
+        }
 
         $file = File::get($path);
         $type = File::mimeType($path);
 
-        return Response::make($file, 200)->header("Content-Type", $type);
+        return Response::make($file, 200)->header('Content-Type', $type);
     }
 }

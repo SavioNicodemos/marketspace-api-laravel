@@ -14,8 +14,9 @@ class Image extends Model
         'name',
         'original_name',
         'format',
-        'folder'
+        'folder',
     ];
+
     /**
      * Get the parent imageable model.
      */

@@ -13,10 +13,9 @@ class NotAuthorizedException extends Exception
     {
         $this->modelName = $modelName ? $modelName : 'Data';
     }
+
     /**
      * Render the exception into an HTTP response.
-     *
-     * @return JsonResponse
      */
     public function render(): JsonResponse
     {

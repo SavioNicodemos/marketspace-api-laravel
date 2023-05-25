@@ -4,8 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use Illuminate\Http\UploadedFile;
+use Tests\TestCase;
 
 class AuthControllerTest extends TestCase
 {

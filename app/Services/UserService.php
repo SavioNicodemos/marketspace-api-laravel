@@ -3,16 +3,15 @@
 namespace App\Services;
 
 use App\Models\Image;
+use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
-use App\Models\User;
 use Throwable;
 
 class UserService
 {
-
     /**
      * @throws Throwable
      */
@@ -51,7 +50,7 @@ class UserService
             'avatar' => $user->image->name ?? null,
             'name' => $user->name,
             'email' => $user->email,
-            'tel' => $user->tel
+            'tel' => $user->tel,
         ];
     }
 }

@@ -3,8 +3,10 @@
 namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
-use Symfony\Component\HttpKernel\Exception\{MethodNotAllowedHttpException, NotFoundHttpException, AccessDeniedHttpException};
 use Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class Handler extends ExceptionHandler
 {
@@ -26,24 +28,24 @@ class Handler extends ExceptionHandler
     {
         $this->renderable(function (NotFoundHttpException $e) {
             return response()->json([
-                'message' => 'Path not found.'
+                'message' => 'Path not found.',
             ], $e->getStatusCode());
         });
 
         $this->renderable(function (MethodNotAllowedHttpException $e) {
             return response()->json([
-                'message' => 'Method not allowed for this route.'
+                'message' => 'Method not allowed for this route.',
             ], $e->getStatusCode());
         });
 
         $this->renderable(function (AccessDeniedHttpException $e) {
             return response()->json([
-                'message' => 'This action is unauthorized.'
+                'message' => 'This action is unauthorized.',
             ], $e->getStatusCode());
         });
 
         $this->renderable(function (FileNotFoundException $e) {
-            return response("", 404);
+            return response('', 404);
         });
     }
 }

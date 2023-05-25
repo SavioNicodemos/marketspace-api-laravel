@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\File;
 
 class ImageService
 {
-
     public function storeImage($imageFromRequest, string $folder): array
     {
         $originalName = $imageFromRequest->getClientOriginalName();
@@ -17,14 +16,14 @@ class ImageService
         $md5Name = md5_file($imageFromRequest->getRealPath());
         $guessExtension = $imageFromRequest->guessExtension();
 
-        $newName = $md5Name . '.' . $guessExtension;
+        $newName = $md5Name.'.'.$guessExtension;
         $imageFromRequest->storeAs($folder, $newName, 'public');
 
         return [
             'name' => $newName,
             'original_name' => $originalName,
             'format' => $extension,
-            'folder' => $folder
+            'folder' => $folder,
         ];
     }
 
@@ -34,12 +33,13 @@ class ImageService
         if (File::exists($imagePath)) {
             File::delete($imagePath);
         }
+
         return true;
     }
 
     public function getImagePath(Image $image): string
     {
-        return public_path('storage') . '/' . $image['folder'] . '/' . $image['name'];
+        return public_path('storage').'/'.$image['folder'].'/'.$image['name'];
     }
 
     /**
@@ -74,6 +74,7 @@ class ImageService
                 throw new NotAuthorizedException('product images');
             }
         }
+
         return true;
     }
 }

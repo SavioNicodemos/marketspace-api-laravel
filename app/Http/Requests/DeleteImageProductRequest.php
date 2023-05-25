@@ -23,7 +23,7 @@ class DeleteImageProductRequest extends FormRequest
     {
         return [
             'productImagesIds' => ['required', 'array'],
-            'productImagesIds.*' => ['required', 'exists:images,id']
+            'productImagesIds.*' => ['required', 'exists:images,id'],
         ];
     }
 }
