@@ -8,3 +8,34 @@
 ## About This API
 
 This is a backend in progress to the marketspace mobile app developed with Laravel.
+
+# Marketspace API
+
+## Description
+
+Welcome to the Marketspace API! This project provides a Laravel-based backend for a compact marketplace application, similar to OLX, but streamlined for efficiency. It focuses on product listings and user management, providing you with all the necessary operations to build a front-end to your liking.
+
+## Features
+
+1. **User Management:** Register, login, update and manage user profiles.
+2. **Product Listings:** Create, read, update, and delete product listings.
+3. **Search and Filter:** Find specific products and filter results based on various parameters.
+
+Please note that this API does not handle transactions; it is designed to be a simple and flexible backend for a marketplace platform.
+
+## Getting Started
+
+### Prerequisites
+
+Ensure you have the following installed on your local development machine:
+
+- PHP >= 7.4
+- Composer
+- Laravel >= 8.x
+- MySQL or any Laravel-supported database system
+
+### Installation
+
+1. Clone the repository to your local machine:
+```bash
+git clone https://github.com/yourusername/marketspace.git
