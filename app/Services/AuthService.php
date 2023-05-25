@@ -35,9 +35,11 @@ class AuthService
     #[ArrayShape(['token' => "\Laravel\Sanctum\string|string", 'user' => "mixed", 'refresh_token' => "string"])]
     private function loginByUserId(string $userId): array
     {
-        $user = User::find($userId);
+        $user = User::with('image')->find($userId);
         $token = $user->createToken('web')->plainTextToken;
         $refreshToken = $this->createRefreshToken($user->id);
+        $user['avatar'] = $user->image->name ?? null;
+        unset($user->image);
         return [
             'token' => $token,
             'user' => $user,
