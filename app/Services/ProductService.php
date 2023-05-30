@@ -8,11 +8,20 @@ use App\Models\Image;
 use App\Models\Product;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
 class ProductService
 {
+    protected string $cacheKey;
+
+    public function __construct()
+    {
+        $this->cacheKey = 'my_products';
+    }
+
     /**
      * @throws Throwable
      */
@@ -26,8 +35,8 @@ class ProductService
             $product->is_new = $request['is_new'];
             $product->price = $request['price'];
             $product->accept_trade = $request['accept_trade'];
-            if (! empty(auth()->user()->id)) {
-                $product->user_id = auth()->user()->id;
+            if (!!auth()->user()->getAuthIdentifier()) {
+                $product->user_id = auth()->user()->getAuthIdentifier();
             }
             $product->is_active = true;
 
@@ -38,6 +47,8 @@ class ProductService
 
             $product->paymentMethods()->sync($paymentMethodsIds);
             DB::commit();
+
+            Cache::forget($this->cacheKey . auth()->user()->getAuthIdentifier());
 
             return $product;
         } catch (Exception $e) {
@@ -60,7 +71,7 @@ class ProductService
             },
         ])->find($productId);
 
-        if (! $product) {
+        if (!$product) {
             throw new NotFoundException('Product');
         }
 
@@ -81,14 +92,16 @@ class ProductService
     {
         $product = Product::find($productId);
 
-        if (! $product) {
+        if (!$product) {
             throw new NotFoundException('Product');
         }
-        if ($product->user_id !== auth()->user()->id) {
+        if ($product->user_id !== auth()->user()->getAuthIdentifier()) {
             throw new NotAuthorizedException('Product');
         }
 
         $product->delete();
+
+        Cache::forget($this->cacheKey . auth()->user()->getAuthIdentifier());
 
         return true;
     }
@@ -100,10 +113,10 @@ class ProductService
     public function update(array $filters, string $productId): bool
     {
         $product = Product::find($productId);
-        if (! $product) {
+        if (!$product) {
             throw new NotFoundException('Product');
         }
-        if ($product->user_id !== auth()->user()->id) {
+        if ($product->user_id !== auth()->user()->getAuthIdentifier()) {
             throw new NotAuthorizedException('Product');
         }
         DB::beginTransaction();
@@ -117,7 +130,7 @@ class ProductService
 
             $product->save();
 
-            if (isset($filters['payment_methods']) && (bool) count($filters['payment_methods'])) {
+            if (isset($filters['payment_methods']) && count($filters['payment_methods'])) {
                 $paymentMethodService = new PaymentMethodService();
                 $paymentMethodsIds = $paymentMethodService->getIdsByKeys($filters['payment_methods']);
 
@@ -125,6 +138,7 @@ class ProductService
             }
 
             DB::commit();
+            Cache::forget($this->cacheKey . auth()->user()->getAuthIdentifier());
 
             return true;
         } catch (Exception $e) {
@@ -133,9 +147,9 @@ class ProductService
         }
     }
 
-    public function listNotMyProducts(array $filters): \Illuminate\Database\Eloquent\Collection
+    public function listNotMyProducts(array $filters): Collection
     {
-        return Product::where('user_id', '!=', auth()->user()->id)
+        return Product::where('user_id', '!=', auth()->user()->getAuthIdentifier())
             ->where('is_active', true)
             ->where(function (Builder $query) use ($filters) {
                 if (isset($filters['is_new'])) {
@@ -145,11 +159,11 @@ class ProductService
                     $query->where('accept_trade', $filters['accept_trade']);
                 }
                 if (isset($filters['query'])) {
-                    $query->where('name', 'LIKE', '%'.$filters['query'].'%');
+                    $query->where('name', 'LIKE', '%' . $filters['query'] . '%');
                 }
             })
             ->whereHas('paymentMethods', function (Builder $paymentsQuery) use ($filters) {
-                $hasPaymentMethodsFilter = isset($filters['payment_methods']) && (bool) count($filters['payment_methods']);
+                $hasPaymentMethodsFilter = isset($filters['payment_methods']) && count($filters['payment_methods']);
                 if ($hasPaymentMethodsFilter) {
                     $paymentsQuery->whereIn('key', $filters['payment_methods']);
                 }
@@ -165,9 +179,11 @@ class ProductService
             ->get(['id', 'name', 'price', 'is_new', 'accept_trade', 'user_id']);
     }
 
-    public function getMyProducts(array $filters)
+    public function getMyProducts(array $filters): Collection
     {
-        return Product::where('user_id', auth()->user()->id)
+        $cachedValues = Cache::get($this->cacheKey . auth()->user()->getAuthIdentifier());
+        if ($cachedValues) return $cachedValues;
+        $myProducts = Product::where('user_id', auth()->user()->getAuthIdentifier())
             ->where(function (Builder $query) use ($filters) {
                 if (isset($filters['is_active'])) {
                     $query->where('is_active', $filters['is_active']);
@@ -180,12 +196,16 @@ class ProductService
                 },
             ])
             ->get();
+
+        Cache::put($this->cacheKey . auth()->user()->getAuthIdentifier(), $myProducts);
+
+        return $myProducts;
     }
 
     /**
      * @throws Throwable
      */
-    public function saveProductImages(array $filters)
+    public function saveProductImages(array $filters): Collection
     {
         $productId = $filters['product_id'];
         $images = $filters['images'];
@@ -193,10 +213,10 @@ class ProductService
         DB::beginTransaction();
         try {
             $product = Product::find($productId);
-            if (! $product) {
+            if (!$product) {
                 throw new NotFoundException('Product');
             }
-            if ($product->user_id !== auth()->user()->id) {
+            if ($product->user_id !== auth()->user()->getAuthIdentifier()) {
                 throw new NotAuthorizedException('Product');
             }
 
